@@ -13,4 +13,17 @@ routes.route('/api/transaction')
 routes.route('/api/labels')
     .get(controller.get_labels);
 
+// -- Budget routes (ER-01) --
+routes.route('/api/budget')
+    .post(controller.create_budget)
+    .get(controller.get_budgets);
+
+routes.route('/api/budget/:month')
+    .get(controller.get_budget)
+    .put(controller.update_budget)
+    .delete(controller.delete_budget);
+
+routes.route('/api/budget/:month/utilization')
+    .get(controller.get_utilization);
+
 module.exports = routes;

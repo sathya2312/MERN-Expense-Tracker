@@ -1,47 +1,60 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const baseURI = 'http://localhost:8080';
 const baseURI = 'https://mernexpensetracker92.herokuapp.com';
 
 export const apiSlice = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: baseURI }),
+    tagTypes: ['categories', 'transaction', 'budget'],
     endpoints: builder => ({
-        // get categories
         getCategories: builder.query({
-            // get: 'http://localhost:8080/api/categories'
             query: () => '/api/categories',
             providesTags: ['categories']
         }),
-
-        // get labels
         getLabels: builder.query({
-            // get: 'http://localhost:8080/api/labels'
             query: () => '/api/labels',
             providesTags: ['transaction']
         }),
-
-        // add new Transaction
         addTransaction: builder.mutation({
             query: (initialTransaction) => ({
-                // post: 'http://localhost:8080/api/transaction'
                 url: '/api/transaction',
-                method: "POST",
+                method: 'POST',
                 body: initialTransaction
             }),
-            invalidatesTags: ['transaction']
+            invalidatesTags: ['transaction', 'budget']
         }),
-
-        // delete record
         deleteTransaction: builder.mutation({
             query: recordId => ({
-                // delete: 'http://localhost:8080/api/transaction'
                 url: '/api/transaction',
-                method: "DELETE",
+                method: 'DELETE',
                 body: recordId
             }),
-            invalidatesTags: ['transaction']
-        })
-
+            invalidatesTags: ['transaction', 'budget']
+        }),
+        // -- Budget endpoints (ER-01) --
+        getBudgets: builder.query({
+            query: () => '/api/budget',
+            providesTags: ['budget']
+        }),
+        getBudget: builder.query({
+            query: (month) => '/api/budget/' + month,
+            providesTags: (result, error, month) => [{ type: 'budget', id: month }]
+        }),
+        getBudgetUtilization: builder.query({
+            query: (month) => '/api/budget/' + month + '/utilization',
+            providesTags: (result, error, month) => [{ type: 'budget', id: month + '_util' }]
+        }),
+        createBudget: builder.mutation({
+            query: (body) => ({ url: '/api/budget', method: 'POST', body }),
+            invalidatesTags: ['budget']
+        }),
+        updateBudget: builder.mutation({
+            query: ({ month, ...body }) => ({ url: '/api/budget/' + month, method: 'PUT', body }),
+            invalidatesTags: ['budget']
+        }),
+        deleteBudget: builder.mutation({
+            query: (month) => ({ url: '/api/budget/' + month, method: 'DELETE' }),
+            invalidatesTags: ['budget']
+        }),
     })
 })
 
