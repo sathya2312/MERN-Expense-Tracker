@@ -54,6 +54,12 @@ export default function Budget() {
         setEditMonth(null);
         reset({ month: '', overall: '', categoryBudgets: [] });
     };
+
+    const handleReset = () => {
+        setEditMonth(null);
+        reset({ month: '', overall: '', categoryBudgets: [] });
+    };
+
     const usedTypes = fields.map(f => f.type);
     const availableCategories = CATEGORIES.filter(c => !usedTypes.includes(c));
 
@@ -112,6 +118,8 @@ export default function Budget() {
                             className='border py-2 text-white btn-blue w-full'>
                             {editMonth ? (updating ? 'Saving...' : 'Update Budget') : (creating ? 'Saving...' : 'Save Budget')}
                         </button>
+                        <button type='button' onClick={handleReset}
+                            className='border py-2 px-3 rounded text-gray-600 bg-gray-100'>Reset</button>
                         {editMonth && (
                             <button type='button' onClick={handleCancel}
                                 className='border py-2 px-3 rounded text-gray-600 bg-gray-100'>Cancel</button>
