@@ -4,6 +4,11 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const insightsService = require('../services/insights.service');
+const alertsService = require('../services/alerts.service');
+const forecastService = require('../services/forecast.service');
+const recommendationsService = require('../services/recommendations.service');
+
 async function create_categories(req, res) {
     const Create = new model.Categories({ type: 'Investment', color: '#FCBE44' });
     await Create.save(function (err) {
@@ -19,8 +24,18 @@ async function create_transaction(req, res) {
     if (!req.body) return res.status(400).json('Post HTTP Data not Provided');
     let { name, type, amount } = req.body;
     const create = new model.Transaction({ name, type, amount, date: new Date() });
-    create.save(function (err) {
-        if (!err) return res.json(create);
+    create.save(async function (err) {
+        if (!err) {
+            // evaluate alerts for current period
+            const now = new Date();
+            const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            try {
+                await alertsService.evaluateThresholdsForPeriod(period, create._id);
+            } catch (e) {
+                // non-blocking
+            }
+            return res.json(create);
+        }
         return res.status(400).json({ message: 'Error creating transaction: ' + err });
     });
 }
@@ -147,10 +162,67 @@ async function get_utilization(req, res) {
         return res.json({ month, utilization: { overall, byCategory } });
     } catch (e) { return res.status(400).json({ message: 'Error computing utilization: ' + e.message }); }
 }
+
+// -- ER-02 Controllers --
+async function get_budget_vs_actual(req, res) {
+    try {
+        const period = req.query.period;
+        const result = await insightsService.getBudgetVsActual(period);
+        return res.json(result);
+    } catch (e) { return res.status(e.statusCode || 400).json({ message: e.message }); }
+}
+
+async function get_health(req, res) {
+    try {
+        const period = req.query.period;
+        const result = await insightsService.getHealth(period);
+        return res.json(result);
+    } catch (e) { return res.status(e.statusCode || 400).json({ message: e.message }); }
+}
+
+async function list_alerts(req, res) {
+    try {
+        const { status, type, period, limit } = req.query;
+        const result = await alertsService.listAlerts({ status, type, period, limit });
+        return res.json(result);
+    } catch (e) { return res.status(e.statusCode || 400).json({ message: e.message }); }
+}
+
+async function update_alert_status(req, res) {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const result = await alertsService.updateAlertStatus(id, status);
+        return res.json(result);
+    } catch (e) { return res.status(e.statusCode || 400).json({ message: e.message }); }
+}
+
+async function get_forecast(req, res) {
+    try {
+        const period = req.query.period;
+        const result = await forecastService.computeForecast(period);
+        return res.json(result);
+    } catch (e) { return res.status(e.statusCode || 400).json({ message: e.message }); }
+}
+
+async function get_recommendations(req, res) {
+    try {
+        const period = req.query.period;
+        const result = await recommendationsService.getRecommendations(period);
+        return res.json(result);
+    } catch (e) { return res.status(e.statusCode || 400).json({ message: e.message }); }
+}
+
 module.exports = {
     create_categories, get_categories,
     create_transaction, get_transaction, delete_transaction,
     get_labels,
     create_budget, get_budgets, get_budget, update_budget, delete_budget,
-    get_utilization
+    get_utilization,
+    get_budget_vs_actual,
+    get_health,
+    list_alerts,
+    update_alert_status,
+    get_forecast,
+    get_recommendations
 };

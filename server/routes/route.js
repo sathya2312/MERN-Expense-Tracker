@@ -26,4 +26,23 @@ routes.route('/api/budget/:month')
 routes.route('/api/budget/:month/utilization')
     .get(controller.get_utilization);
 
+// -- Intelligent Planning APIs (ER-02) --
+routes.route('/api/insights/budget-vs-actual')
+    .get(controller.get_budget_vs_actual);
+
+routes.route('/api/insights/health')
+    .get(controller.get_health);
+
+routes.route('/api/alerts')
+    .get(controller.list_alerts);
+
+routes.route('/api/alerts/:id')
+    .patch(controller.update_alert_status);
+
+routes.route('/api/forecast')
+    .get(controller.get_forecast);
+
+routes.route('/api/recommendations')
+    .get(controller.get_recommendations);
+
 module.exports = routes;

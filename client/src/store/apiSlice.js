@@ -4,7 +4,7 @@ const baseURI = 'https://mernexpensetracker92.herokuapp.com';
 
 export const apiSlice = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: baseURI }),
-    tagTypes: ['categories', 'transaction', 'budget'],
+    tagTypes: ['categories', 'transaction', 'budget', 'alerts', 'insights', 'forecast', 'recommendations'],
     endpoints: builder => ({
         getCategories: builder.query({
             query: () => '/api/categories',
@@ -20,7 +20,7 @@ export const apiSlice = createApi({
                 method: 'POST',
                 body: initialTransaction
             }),
-            invalidatesTags: ['transaction', 'budget']
+            invalidatesTags: ['transaction', 'budget', 'alerts', 'insights', 'forecast', 'recommendations']
         }),
         deleteTransaction: builder.mutation({
             query: recordId => ({
@@ -28,7 +28,7 @@ export const apiSlice = createApi({
                 method: 'DELETE',
                 body: recordId
             }),
-            invalidatesTags: ['transaction', 'budget']
+            invalidatesTags: ['transaction', 'budget', 'alerts', 'insights', 'forecast', 'recommendations']
         }),
         // -- Budget endpoints (ER-01) --
         getBudgets: builder.query({
@@ -55,6 +55,32 @@ export const apiSlice = createApi({
             query: (month) => ({ url: '/api/budget/' + month, method: 'DELETE' }),
             invalidatesTags: ['budget']
         }),
+
+        // -- ER-02 Intelligent Planning endpoints --
+        getBudgetVsActual: builder.query({
+            query: (period) => ({ url: '/api/insights/budget-vs-actual', params: { period } }),
+            providesTags: (result, error, period) => [{ type: 'insights', id: 'bva-' + period }]
+        }),
+        getHealth: builder.query({
+            query: (period) => ({ url: '/api/insights/health', params: { period } }),
+            providesTags: (result, error, period) => [{ type: 'insights', id: 'health-' + period }]
+        }),
+        getAlerts: builder.query({
+            query: (params) => ({ url: '/api/alerts', params }),
+            providesTags: ['alerts']
+        }),
+        updateAlertStatus: builder.mutation({
+            query: ({ id, status }) => ({ url: '/api/alerts/' + id, method: 'PATCH', body: { status } }),
+            invalidatesTags: ['alerts']
+        }),
+        getForecast: builder.query({
+            query: (period) => ({ url: '/api/forecast', params: { period } }),
+            providesTags: (result, error, period) => [{ type: 'forecast', id: period }]
+        }),
+        getRecommendations: builder.query({
+            query: (period) => ({ url: '/api/recommendations', params: { period } }),
+            providesTags: (result, error, period) => [{ type: 'recommendations', id: period }]
+        })
     })
 })
 

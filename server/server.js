@@ -13,15 +13,14 @@ app.use(express.json());
 // MongoDB Connection
 const con = require('./db/connection');
 
+// Jobs
+const { startScheduler } = require('./jobs/scheduler');
+startScheduler();
+
 // Using Routes
 app.use(require('./routes/route'));
 
 if (process.env.NODE_ENV == 'production') {
-    // app.use(express.static(path.join(__dirname, '../client/build')));
-
-    // app.get('/', function(req, res){
-    //     res.sendFile('D: /Study/My Projects/MERN Expense Tracker/client/build/index.html');
-    // });
     app.get('/', function (req, res) {
         res.send('API running');
     });

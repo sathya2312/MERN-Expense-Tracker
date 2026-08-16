@@ -3,6 +3,9 @@ import Graph from './components/Graph';
 import Form from './components/Form';
 import Budget from './components/Budget';
 import BudgetUtilization from './components/BudgetUtilization';
+import AlertsCenter from './components/AlertsCenter';
+import ForecastView from './components/ForecastView';
+import FinancialHealthDashboard from './components/FinancialHealthDashboard';
 
 function App() {
   return (
@@ -13,12 +16,25 @@ function App() {
           <Graph></Graph>
           <Form></Form>
         </div>
+
         <hr className='my-10 border-gray-200' />
         <h2 className='text-2xl py-4 mb-6 bg-purple text-white rounded'>Budget Management</h2>
         <div className='grid md:grid-cols-2 gap-4'>
           <Budget></Budget>
           <BudgetUtilization></BudgetUtilization>
         </div>
+
+        <hr className='my-10 border-gray-200' />
+        <h2 className='text-2xl py-4 mb-6 bg-purple text-white rounded'>Alerts</h2>
+        <AlertsCenter />
+
+        <hr className='my-10 border-gray-200' />
+        <h2 className='text-2xl py-4 mb-6 bg-purple text-white rounded'>Forecast</h2>
+        <ForecastView />
+
+        <hr className='my-10 border-gray-200' />
+        <h2 className='text-2xl py-4 mb-6 bg-purple text-white rounded'>Financial Health</h2>
+        <FinancialHealthDashboard />
       </div>
     </div>
   );
